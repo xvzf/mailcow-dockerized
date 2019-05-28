@@ -302,7 +302,7 @@ services:
         - "traefik.mailcow.backend=nginx_mailcow"
         - "traefik.mailcow.port=80"
         - "traefik.mailcow.frontend.rule=Host:${MAILCOW_HOSTNAME}"
-        - "traefik.docker.network=nginx_mailcow"
+        - "traefik.docker.network=traefik_proxy"
         - "traefik.enable=true"
       networks:
         mailcow-network:
