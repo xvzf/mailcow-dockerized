@@ -16,6 +16,8 @@ services:
           ipv4_address: ${IPV4_NETWORK:-172.22.1}.254
           aliases:
             - unbound
+      labels:
+        - "traefik.enable=false"
 
     mysql-mailcow:
       image: mariadb:10.2
@@ -38,6 +40,8 @@ services:
         mailcow-network:
           aliases:
             - mysql
+      labels:
+        - "traefik.enable=false"
 
     redis-mailcow:
       image: redis:5-alpine
@@ -53,6 +57,8 @@ services:
           ipv4_address: ${IPV4_NETWORK:-172.22.1}.249
           aliases:
             - redis
+      labels:
+        - "traefik.enable=false"
 
     clamd-mailcow:
       image: mailcow/clamd:1.22
@@ -69,6 +75,8 @@ services:
         mailcow-network:
           aliases:
             - clamd
+      labels:
+        - "traefik.enable=false"
 
     rspamd-mailcow:
       image: mailcow/rspamd:1.42
@@ -96,6 +104,8 @@ services:
         mailcow-network:
           aliases:
             - rspamd
+      labels:
+        - "traefik.enable=false"
 
     php-fpm-mailcow:
       image: mailcow/phpfpm:1.37
@@ -143,6 +153,8 @@ services:
         mailcow-network:
           aliases:
             - phpfpm
+      labels:
+        - "traefik.enable=false"
 
     sogo-mailcow:
       image: mailcow/sogo:1.54
@@ -171,6 +183,8 @@ services:
           ipv4_address: ${IPV4_NETWORK:-172.22.1}.248
           aliases:
             - sogo
+      labels:
+        - "traefik.enable=false"
 
     dovecot-mailcow:
       image: mailcow/dovecot:1.73
@@ -223,6 +237,8 @@ services:
           ipv4_address: ${IPV4_NETWORK:-172.22.1}.250
           aliases:
             - dovecot
+      labels:
+        - "traefik.enable=false"
 
     postfix-mailcow:
       image: mailcow/postfix:1.31
@@ -254,6 +270,8 @@ services:
         mailcow-network:
           aliases:
             - postfix
+      labels:
+        - "traefik.enable=false"
 
     memcached-mailcow:
       image: memcached:alpine
@@ -264,6 +282,8 @@ services:
         mailcow-network:
           aliases:
             - memcached
+      labels:
+        - "traefik.enable=false"
 
     nginx-mailcow:
       depends_on:
@@ -328,6 +348,8 @@ services:
         mailcow-network:
           aliases:
             - acme
+      labels:
+        - "traefik.enable=false"
 
     netfilter-mailcow:
       image: mailcow/netfilter:1.25
@@ -352,6 +374,8 @@ services:
         - ${IPV4_NETWORK:-172.22.1}.254
       volumes:
         - /lib/modules:/lib/modules:ro
+      labels:
+        - "traefik.enable=false"
 
     watchdog-mailcow:
       image: mailcow/watchdog:1.42
@@ -384,6 +408,8 @@ services:
         mailcow-network:
           aliases:
             - watchdog
+      labels:
+        - "traefik.enable=false"
 
     dockerapi-mailcow:
       image: mailcow/dockerapi:1.28
@@ -400,6 +426,8 @@ services:
         mailcow-network:
           aliases:
             - dockerapi
+      labels:
+        - "traefik.enable=false"
 
     solr-mailcow:
       image: mailcow/solr:1.5
@@ -417,6 +445,8 @@ services:
         mailcow-network:
           aliases:
             - solr
+      labels:
+        - "traefik.enable=false"
 
 networks:
   mailcow-network:
