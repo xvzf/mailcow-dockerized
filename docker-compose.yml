@@ -272,7 +272,6 @@ services:
         - redis-mailcow
       image: nginx:mainline-alpine
       command: /bin/sh -c "envsubst < /etc/nginx/conf.d/templates/listen_plain.template > /etc/nginx/conf.d/listen_plain.active &&
-        envsubst < /etc/nginx/conf.d/templates/listen_ssl.template > /etc/nginx/conf.d/listen_ssl.active &&
         envsubst < /etc/nginx/conf.d/templates/server_name.template > /etc/nginx/conf.d/server_name.active &&
         envsubst < /etc/nginx/conf.d/templates/sogo.template > /etc/nginx/conf.d/sogo.active &&
         envsubst < /etc/nginx/conf.d/templates/sogo_eas.template > /etc/nginx/conf.d/sogo_eas.active &&
@@ -284,7 +283,6 @@ services:
         until ping rspamd -c1 > /dev/null; do sleep 1; done &&
         exec nginx -g 'daemon off;'"
       environment:
-        - HTTPS_PORT=${HTTPS_PORT:-443}
         - HTTP_PORT=${HTTP_PORT:-80}
         - MAILCOW_HOSTNAME=${MAILCOW_HOSTNAME}
         - IPV4_NETWORK=${IPV4_NETWORK:-172.22.1}
@@ -297,42 +295,34 @@ services:
         - ./data/conf/nginx/:/etc/nginx/conf.d/:rw
         - ./data/conf/rspamd/meta_exporter:/meta_exporter:ro
         - sogo-web-vol-1:/usr/lib/GNUstep/SOGo/
-      ports:
-        - "${HTTPS_BIND:-0.0.0.0}:${HTTPS_PORT:-443}:${HTTPS_PORT:-443}"
-        - "${HTTP_BIND:-0.0.0.0}:${HTTP_PORT:-80}:${HTTP_PORT:-80}"
       restart: always
       dns:
         - ${IPV4_NETWORK:-172.22.1}.254
+      labels:
+        - "traefik.mailcow.backend=mailcow"
+        - "traefik.mailcow.port=80"
+        - "traefik.mailcow.frontend.rule=Host:${MAILCOW_HOSTNAME}"
+        - "traefik.docker.network=nginx_mailcow"
+        - "traefik.enable=true"
       networks:
         mailcow-network:
           aliases:
             - nginx
+        proxy:
+          aliases:
+            - nginx_mailcow
 
     acme-mailcow:
       depends_on:
         - nginx-mailcow
-      image: mailcow/acme:1.56
-      build: ./data/Dockerfiles/acme
+      image: quay.io/xvzf/maicow-acme-traefik
       dns:
         - ${IPV4_NETWORK:-172.22.1}.254
       environment:
-        - LOG_LINES=${LOG_LINES:-9999}
-        - ADDITIONAL_SAN=${ADDITIONAL_SAN}
         - MAILCOW_HOSTNAME=${MAILCOW_HOSTNAME}
-        - DBNAME=${DBNAME}
-        - DBUSER=${DBUSER}
-        - DBPASS=${DBPASS}
-        - SKIP_LETS_ENCRYPT=${SKIP_LETS_ENCRYPT:-n}
-        - SKIP_IP_CHECK=${SKIP_IP_CHECK:-n}
-        - SKIP_HTTP_VERIFICATION=${SKIP_HTTP_VERIFICATION:-n}
-        - ONLY_MAILCOW_HOSTNAME=${ONLY_MAILCOW_HOSTNAME:-n}
-        - LE_STAGING=${LE_STAGING:-n}
-        - TZ=${TZ}
       volumes:
-        - ./data/web/.well-known/acme-challenge:/var/www/acme:rw
-        - ./data/assets/ssl:/var/lib/acme/:rw
-        - ./data/assets/ssl-example:/var/lib/ssl-example/:ro
-        - mysql-socket-vol-1:/var/run/mysqld/
+        - ./data/assets/ssl:/ssl
+        - /etc/traefik/acme.json:/acme.json
       restart: always
       networks:
         mailcow-network:
@@ -465,6 +455,9 @@ networks:
       config:
         - subnet: ${IPV4_NETWORK:-172.22.1}.0/24
         - subnet: ${IPV6_NETWORK:-fd4d:6169:6c63:6f77::/64}
+  proxy:
+    external:
+      name: traefik_proxy
 
 volumes:
   # Storage for email files
