@@ -335,7 +335,7 @@ services:
     acme-mailcow:
       depends_on:
         - nginx-mailcow
-      image: quay.io/xvzf/maicow-acme-traefik
+      image: quay.io/xvzf/maicow-acme-traefik:v0.1
       dns:
         - ${IPV4_NETWORK:-172.22.1}.254
       environment:
